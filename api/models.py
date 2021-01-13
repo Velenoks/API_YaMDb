@@ -73,11 +73,11 @@ class Comment(models.Model):
                                verbose_name="Автор",
                                on_delete=models.CASCADE,
                                related_name="comments")
-    created = models.DateTimeField("Дата добавления",
-                                   auto_now_add=True)
+    pub_date = models.DateTimeField("Дата добавления",
+                                    auto_now_add=True)
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ('-pub_date',)
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
 
