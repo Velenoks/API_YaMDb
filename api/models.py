@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, blank=False)
+    name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -16,12 +16,13 @@ class Category(models.Model):
 
 
 class Titles(models.Model):
-    name = models.CharField(max_length=200, blank=False)
+    name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[
-                                    MaxValueValidator(2022),
-                                    MinValueValidator(1)
-                                ]
-                               )
+        MaxValueValidator(2022),
+        MinValueValidator(1)
+    ],
+        blank=True
+    )
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL, related_name="titles")
 
     def __str__(self):
@@ -34,10 +35,10 @@ class Titles(models.Model):
 
 
 class Review(models.Model):
-    title = models.ForeignKey(Titles, blank=False, null=False, on_delete=models.CASCADE, related_name="reviews")
-    text = models.TextField(blank=False)
+    title = models.ForeignKey(Titles, null=False, on_delete=models.CASCADE, related_name="reviews")
+    text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
-    score = models.IntegerField(blank=False, default=5,
+    score = models.IntegerField(default=5,
                                 validators=[
                                     MaxValueValidator(100),
                                     MinValueValidator(1)
@@ -52,8 +53,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments", blank=False)
-    text = models.TextField(blank=False)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments")
+    text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     created = models.DateTimeField("created", auto_now_add=True)
 
@@ -64,7 +65,7 @@ class Comment(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=200, blank=False)
+    name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
