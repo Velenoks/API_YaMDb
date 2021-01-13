@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from django.contrib.auth import get_user_model
@@ -6,7 +7,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, blank=False)
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -15,8 +16,12 @@ class Category(models.Model):
 
 
 class Titles(models.Model):
-    name = models.CharField(max_length=200)
-    year = models.DateField("год выпуска")
+    name = models.CharField(max_length=200, blank=False)
+    year = models.IntegerField(validators=[
+                                    MaxValueValidator(2022),
+                                    MinValueValidator(1)
+                                ]
+                               )
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL, related_name="titles")
 
     def __str__(self):
@@ -30,9 +35,14 @@ class Titles(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(Titles, blank=False, null=False, on_delete=models.CASCADE, related_name="reviews")
-    text = models.TextField()
+    text = models.TextField(blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
-    score = models.PositiveSmallIntegerField(choices=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+    score = models.IntegerField(blank=False, default=5,
+                                validators=[
+                                    MaxValueValidator(100),
+                                    MinValueValidator(1)
+                                ]
+                                )
     pub_date = models.DateTimeField("date published", auto_now_add=True)
 
     class Meta:
@@ -42,8 +52,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments")
-    text = models.TextField()
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments", blank=False)
+    text = models.TextField(blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     created = models.DateTimeField("created", auto_now_add=True)
 
@@ -54,7 +64,7 @@ class Comment(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, blank=False)
     slug = models.SlugField(unique=True)
 
 
