@@ -23,6 +23,7 @@ class Titles(models.Model):
     ],
         blank=True
     )
+    description = models.TextField(blank=True)
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL, related_name="titles")
 
     def __str__(self):
@@ -38,8 +39,7 @@ class Review(models.Model):
     title = models.ForeignKey(Titles, null=False, on_delete=models.CASCADE, related_name="reviews")
     text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
-    score = models.IntegerField(default=5,
-                                validators=[
+    score = models.IntegerField(validators=[
                                     MaxValueValidator(100),
                                     MinValueValidator(1)
                                 ]
@@ -67,6 +67,10 @@ class Comment(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name = "Жанр"
+        verbose_name_plural = "Жанры"
 
 
 class GenreTitle(models.Model):
