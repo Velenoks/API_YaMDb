@@ -6,11 +6,32 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import (Review, Comment, Title,
                      Genre, Category)
-from .serializers import (
-    ReviewSerializer,
-    CommentSerializer,
-    TitleSerializer)
-from .permission import IsAuthorOrReadOnly
+from .serializers import (ReviewSerializer, CommentSerializer,
+                          CategorySerializer, GenreSerializer,
+                          TitleSerializer)
+from .permission import IsAuthorOrReadOnly, IsAdmin
+
+
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -42,12 +63,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'genre', 'name', 'year']
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    # тут, по идее, не должно быть ограничений вообще. или только Администратор на создание, патч и удаление
-
-    def perform_create(self, serializer):
-        if self.request.user.role == 'admin':  # не уверен, правильно ли я здесь ссылаюсь на роль
-            serializer.save()
-    #     а если нет - то что ???

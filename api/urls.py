@@ -11,6 +11,12 @@ from . import views
 app_name = 'api'
 
 router = DefaultRouter()
+router.register(r'categories',
+                views.CategoryViewSet,
+                basename=app_name)
+router.register(r'genres',
+                views.GenreViewSet,
+                basename=app_name)
 router.register(r'titles',
                 views.TitleViewSet,
                 basename=app_name)

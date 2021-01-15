@@ -12,6 +12,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
@@ -21,11 +22,13 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
 
 class Title(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[
         MaxValueValidator(2022),
@@ -35,12 +38,15 @@ class Title(models.Model):
     )
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(Genre, through='GenreTitle')
-    category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL, related_name="titles")
+    category = models.ForeignKey(Category,
+                                 blank=True,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 related_name="titles")
 
     @property
     def rating(self):
         return Review.objects.filter(title=self.id).aggregate(Avg('score'))
-    # либо еще такой вариант. только он тоже говорит про unresolved attribute reference
 
     def __str__(self):
         return self.name
