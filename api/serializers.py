@@ -1,8 +1,21 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from django.db.models import Avg
 
-from .models import Review, Comment, Title
+from .models import Review, Comment, Category, Genre, Title
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -36,9 +49,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    # rating = Review.objects.filter(title=id).aggregate(Avg('score'))
-    # как вариант. но не уверен, что он воспримет id, как поле id из этого сериализатора
-    rating = serializers.SerializerMethodField()
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug'
@@ -47,9 +57,3 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
         model = Title
-
-    def get_rating(self):
-        return Review.objects.filter(title=self.id).aggregate(Avg('score'))
-    # в таком способе можно использовать self, так что он должен работать.
-    # надо только удостовериться, с каким названием поля сравниваем
-    # в смысле - содержит ли поле title именно id
