@@ -63,9 +63,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'genre', 'name', 'year']
-
-    def perform_create(self, serializer):
-        if self.request.user.role == 'admin':
-            serializer.save()
