@@ -19,3 +19,4 @@ media/
 db.sqlite3
 /api/migrations/
 /users/migrations/
+/sent_emails/
