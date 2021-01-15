@@ -4,10 +4,12 @@ from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from .models import (Review, Comment, Titles,
+from .models import (Review, Comment, Title,
                      Genre, Category)
 from .serializers import (
-    ReviewSerializer, CommentSerializer)
+    ReviewSerializer,
+    CommentSerializer,
+    TitleSerializer)
 from .permission import IsAuthorOrReadOnly
 
 
@@ -37,31 +39,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category', 'genre', 'name', 'year']
     permission_classes = (IsAuthenticatedOrReadOnly,)
     # тут, по идее, не должно быть ограничений вообще. или только Администратор на создание, патч и удаление
 
     def perform_create(self, serializer):
-        serializer.save()
-    #     пока не пойму - тут делать проверку на права администратора. или в сериализаторе?
-    # и вообще - эта операция справляется со всей троицей put/patch/delete?
-
-    def get_titles(self):
-        titles = Titles.objects.all().filter('pub_date')
-        if request.method == 'GET':
-            serializer = TitlesSerializer(Titles)
-            if serializer.is_valid():
-                serializer = TitlesSerializer(Titles, titles, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_titles(self, id):
-        titles = Titles.objects.get(pk=id)
-        if request.method == 'GET':
-            serializer = TitlesSerializer(Titles)
-            if serializer.is_valid():
-                serializer = TitlesSerializer(Titles, titles)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if self.request.user.role == 'admin':  # не уверен, правильно ли я здесь ссылаюсь на роль
+            serializer.save()
+    #     а если нет - то что ???
