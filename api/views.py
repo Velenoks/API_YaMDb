@@ -4,12 +4,12 @@ from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from .models import (Review, Comment, Titles,
+from .models import (Review, Comment, Title,
                      Genre, Category)
 from .serializers import (
     ReviewSerializer,
     CommentSerializer,
-    TitlesSerializer)
+    TitleSerializer)
 from .permission import IsAuthorOrReadOnly
 
 
@@ -39,9 +39,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'genre', 'name', 'year']
     permission_classes = (IsAuthenticatedOrReadOnly,)

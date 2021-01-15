@@ -12,7 +12,7 @@ app_name = 'api'
 
 router = DefaultRouter()
 router.register(r'titles',
-                views.TitlesViewSet,
+                views.TitleViewSet,
                 basename=app_name)
 router.register(r'titles/(?P<title_id>\d+)/reviews',
                 views.ReviewViewSet,

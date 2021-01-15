@@ -2,6 +2,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from django.contrib.auth import get_user_model
+from django.db.models import Avg
 
 User = get_user_model()
 
@@ -24,7 +25,7 @@ class Genre(models.Model):
         verbose_name_plural = "Жанры"
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[
         MaxValueValidator(2022),
@@ -36,6 +37,11 @@ class Titles(models.Model):
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL, related_name="titles")
 
+    @property
+    def rating(self):
+        return Review.objects.filter(title=self.id).aggregate(Avg('score'))
+    # либо еще такой вариант. только он тоже говорит про unresolved attribute reference
+
     def __str__(self):
         return self.name
 
@@ -46,12 +52,12 @@ class Titles(models.Model):
 
 
 class GenreTitle(models.Model):
-    title = models.ForeignKey(Titles, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
-    title = models.ForeignKey(Titles,
+    title = models.ForeignKey(Title,
                               verbose_name="Произведение",
                               on_delete=models.CASCADE,
                               related_name="reviews")
