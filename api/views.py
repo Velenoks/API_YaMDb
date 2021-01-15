@@ -7,7 +7,9 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import (Review, Comment, Titles,
                      Genre, Category)
 from .serializers import (
-    ReviewSerializer, CommentSerializer)
+    ReviewSerializer,
+    CommentSerializer,
+    TitlesSerializer)
 from .permission import IsAuthorOrReadOnly
 
 
