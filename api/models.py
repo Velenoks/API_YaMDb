@@ -11,6 +11,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
@@ -20,6 +21,7 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 

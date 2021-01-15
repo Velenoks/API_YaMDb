@@ -11,6 +11,15 @@ from . import views
 app_name = 'api'
 
 router = DefaultRouter()
+router.register(r'categories',
+                views.CategoryViewSet,
+                basename=app_name)
+router.register(r'genres',
+                views.GenreViewSet,
+                basename=app_name)
+router.register(r'titles',
+                views.TitlesViewSet,
+                basename=app_name)
 router.register(r'titles/(?P<title_id>\d+)/reviews',
                 views.ReviewViewSet,
                 basename=app_name)
