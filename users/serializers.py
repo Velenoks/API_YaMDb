@@ -1,6 +1,16 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import User
+User = get_user_model()
+
+
+class YamdbTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.name
+        return token
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,4 +23,4 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'role',
         )
-    model = User
+        model = User

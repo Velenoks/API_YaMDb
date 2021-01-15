@@ -27,3 +27,4 @@ sqlparse==0.4.1           # via django
 urllib3==1.26.2           # via requests
 wcwidth==0.2.5            # via pytest
 zipp==3.4.0               # via importlib-metadata
+django-cors-headers==3.6.0
