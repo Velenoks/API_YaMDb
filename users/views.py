@@ -106,6 +106,7 @@ class UserViewSet(
             instance = self.get_object()
             serializer = UserSerializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(serializer.data)
         else:
             raise Exception('Not implemented')
