@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -25,15 +26,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
 
+    def validate(self, attrs):
+        """Проверка повторного Review."""
+        if self.context.get('request').method == 'POST':
+            title_id = self.context.get('view').kwargs.get('title_id')
+            title = get_object_or_404(Title, id=title_id)
+            if Review.objects.filter(author=self.context['request'].user,
+                                     title=title).exists():
+                raise serializers.ValidationError()
+        return attrs
+
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date', 'score')
         model = Review
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=['title', 'author']
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -52,6 +57,7 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         read_only=True,
+        default=CategorySerializer
     )
     genre = serializers.SlugRelatedField(
         many=True,
@@ -60,6 +66,6 @@ class TitleSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('pk', 'name', 'year', 'rating',
+        fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
         model = Title

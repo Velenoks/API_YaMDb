@@ -28,7 +28,6 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[
         MaxValueValidator(2022),
@@ -46,7 +45,8 @@ class Title(models.Model):
 
     @property
     def rating(self):
-        return Review.objects.filter(title=self.id).aggregate(Avg('score'))
+        return Review.objects.filter(title=self.id).aggregate(
+            Avg('score'))['score__avg']
 
     def __str__(self):
         return self.name

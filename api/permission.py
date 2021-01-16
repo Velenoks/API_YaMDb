@@ -7,6 +7,13 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
                 or obj.author == request.user)
 
 
+class IsModerOrAuthorOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (request.method in permissions.SAFE_METHODS
+                or 'moderator' == request.user.role
+                or obj.author == request.user)
+
+
 class IsAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.method in permissions.SAFE_METHODS
