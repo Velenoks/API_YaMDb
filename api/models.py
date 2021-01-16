@@ -46,7 +46,8 @@ class Title(models.Model):
 
     @property
     def rating(self):
-        return Review.objects.filter(title=self.id).aggregate(Avg('score'))
+        return Review.objects.filter(title=self.id).aggregate(
+            Avg('score'))['score__avg']
 
     def __str__(self):
         return self.name

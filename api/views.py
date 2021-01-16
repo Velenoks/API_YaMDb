@@ -43,7 +43,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Review.objects.filter(title=title_id)
 
     def perform_create(self, serializer, *args, **kwargs):
-        serializer.save(author=self.request.user)
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -63,6 +65,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'genre', 'name', 'year']

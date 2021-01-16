@@ -28,12 +28,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date', 'score')
         model = Review
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=['title', 'author']
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -60,6 +54,6 @@ class TitleSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('pk', 'name', 'year', 'rating',
+        fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
         model = Title
