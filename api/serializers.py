@@ -54,16 +54,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        read_only=True,
-        default=CategorySerializer
-    )
-    genre = serializers.SlugRelatedField(
-        many=True,
-        slug_field='slug',
-        read_only=True,
-    )
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
