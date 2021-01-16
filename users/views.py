@@ -18,7 +18,7 @@ from .models import User
 from .permissions import (
     AdminOnlyPermission, AdminOrModeratorOrAuthorPermission
 )
-from .serializers import UserSerializer, TokenSerializer
+from .serializers import UserSerializerForAdmin, UserSerializer, TokenSerializer
 
 
 USER_DOES_NOT_EXIST = 'Ошибка при отправке запроса: такого пользователя нет в базе данных'
@@ -29,7 +29,7 @@ USER_DOES_NOT_EXIST = 'Ошибка при отправке запроса: та
 def auth(request):
     email = request.data['email']
     username = email[0:email.find('@')]
-    serializer = UserSerializer(
+    serializer = UserSerializerForAdmin(
         data={
             'email': email,
             'username': username
@@ -65,7 +65,7 @@ def get_token(request):
     return Response(USER_DOES_NOT_EXIST, status.HTTP_400_BAD_REQUEST)
 
 
-class AdminUserViewSet(
+class UserViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -75,13 +75,13 @@ class AdminUserViewSet(
 ):
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerForAdmin
     permission_classes = (AdminOnlyPermission,)
     import logging
     logger = logging.getLogger('my')
 
     def create(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializerForAdmin(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
             confirmation_code = urlsafe_base64_encode(force_bytes(username))
@@ -104,7 +104,7 @@ class AdminUserViewSet(
             return self.retrieve(request)
         elif request.method == 'PATCH':
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer = UserSerializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             return Response(serializer.data)
         else:
