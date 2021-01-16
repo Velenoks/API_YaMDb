@@ -28,3 +28,4 @@ urllib3==1.26.2           # via requests
 wcwidth==0.2.5            # via pytest
 zipp==3.4.0               # via importlib-metadata
 django-cors-headers==3.6.0
+django_extensions==3.1.0

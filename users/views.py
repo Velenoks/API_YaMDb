@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from rest_framework import viewsets, filters, mixins, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -65,11 +65,20 @@ def get_token(request):
     return Response(USER_DOES_NOT_EXIST, status.HTTP_400_BAD_REQUEST)
 
 
-class AdminUserViewSet(viewsets.ModelViewSet):
+class AdminUserViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOnlyPermission,)
+    import logging
+    logger = logging.getLogger('my')
 
     def create(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
@@ -79,3 +88,24 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             serializer.save(confirmation_code=confirmation_code)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status.HTTP_400_BAD_REQUEST)
+
+    def get_object(self):
+        user = get_object_or_404(User, username=self.kwargs['pk'])
+        return user
+
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=[AdminOrModeratorOrAuthorPermission]
+    )
+    def me(self, request):
+        self.kwargs['pk'] = request.user.username
+        if request.method == 'GET':
+            return self.retrieve(request)
+        elif request.method == 'PATCH':
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            return Response(serializer.data)
+        else:
+            raise Exception('Not implemented')
