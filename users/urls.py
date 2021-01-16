@@ -11,7 +11,6 @@ from .views import auth, AdminUserViewSet, get_token
 router = DefaultRouter()
 
 urlpatterns = [
-    #path('v1/auth/email/', AuthPostViewSet, name='email_confirmation'),
     path('v1/auth/email/', csrf_exempt(auth)),
     path('v1/auth/token/', get_token, name='token_obtain_pair'),
     path('v1/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
