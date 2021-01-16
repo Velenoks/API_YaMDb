@@ -22,7 +22,7 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        blank=True,
+        blank=False,
     )
 
     class Meta:
