@@ -5,20 +5,15 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from rest_framework import viewsets, filters, mixins, status
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-    AllowAny
-)
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .permissions import (
     AdminOnlyPermission, AdminOrModeratorOrAuthorPermission
 )
-from .serializers import UserSerializerForAdmin, UserSerializer, TokenSerializer
+from .serializers import UserSerializerForAdmin, UserSerializer
 
 
 USER_DOES_NOT_EXIST = 'Ошибка при отправке запроса: такого пользователя нет в базе данных'
@@ -37,7 +32,10 @@ def auth(request):
     )
     if serializer.is_valid():
         confirmation_code = urlsafe_base64_encode(force_bytes(username))
-        serializer.save(username=username, confirmation_code=confirmation_code)
+        serializer.save(
+            username=username,
+            confirmation_code=confirmation_code
+        )
         send_mail(
             subject='Confirmation Code',
             message=f'Код подтверждения для получения токена: {confirmation_code}',
@@ -54,8 +52,14 @@ def auth(request):
 def get_token(request):
     email = request.data['email']
     confirmation_code = request.data['confirmation_code']
-    if User.objects.filter(email=email, confirmation_code=confirmation_code).exists():
-        user = User.objects.get(confirmation_code=confirmation_code, email=email)
+    if User.objects.filter(
+            email=email,
+            confirmation_code=confirmation_code
+    ).exists():
+        user = User.objects.get(
+            confirmation_code=confirmation_code,
+            email=email
+        )
         tokens = RefreshToken.for_user(user)
         data = {
             "refresh": str(tokens),
@@ -77,8 +81,6 @@ class UserViewSet(
     queryset = User.objects.all()
     serializer_class = UserSerializerForAdmin
     permission_classes = (AdminOnlyPermission,)
-    import logging
-    logger = logging.getLogger('my')
 
     def create(self, request, *args, **kwargs):
         serializer = UserSerializerForAdmin(data=request.data)
@@ -104,7 +106,11 @@ class UserViewSet(
             return self.retrieve(request)
         elif request.method == 'PATCH':
             instance = self.get_object()
-            serializer = UserSerializer(instance, data=request.data, partial=True)
+            serializer = UserSerializer(
+                instance,
+                data=request.data,
+                partial=True
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
