@@ -18,9 +18,12 @@ class User(AbstractUser):
         verbose_name='Роль пользователя'
     )
     email = models.EmailField('email', unique=True)
-    confirmation_code = models.UUIDField(null=True)
+    confirmation_code = models.CharField(max_length=200, blank=False)
     username = models.CharField(
         max_length=150,
         unique=True,
         blank=True,
     )
+
+    class Meta:
+        ordering = ['-id']
