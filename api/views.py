@@ -74,3 +74,23 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'genre', 'name', 'year']
 
+    def perform_create(self, serializer):
+        category_slug = self.request.data['category']
+        genres = self.request.data['genre']
+        name = self.request.data['name']
+        category = get_object_or_404(Category, slug=category_slug)
+        serializer.save(category=category,)
+#        title = Title.objects.get(name=name)
+#        for genre in genres:
+#            print(genre)
+#            genre_obj = get_object_or_404(Genre, slug=genre)
+#            title.genre.add(genre_obj)
+#        title.save()
+
+    def perform_update(self, serializer):
+        category_slug = self.request.data['category']
+        category = get_object_or_404(Category, slug=category_slug)
+        serializer.save(category=category,)
+
+
+
