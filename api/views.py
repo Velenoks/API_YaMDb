@@ -68,24 +68,45 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    # queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category', 'genre', 'name', 'year']
+    filterset_fields = ['year']
+
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        # print(self.request.query_params)
+        genre = self.request.query_params.get('genre', None)
+        category = self.request.query_params.get('category', None)
+        name = self.request.query_params.get('name', None)
+        if genre is not None:
+            queryset = queryset.filter(genre__slug=genre)
+        elif category is not None:
+            queryset = queryset.filter(category__slug=category)
+        elif name is not None:
+            queryset = queryset.filter(name__contains=name)
+        return queryset
 
     def perform_create(self, serializer):
-        category_slug = self.request.data['category']
-        genres = self.request.data['genre']
-        name = self.request.data['name']
+        data = self.request.data
+        # print('findme')
+        # print(data)
+        # print(self.request.POST.getlist('genre'))
+        name = data['name']
+        # year = data['year']
+        # description = data['description']
+        category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
-        serializer.save(category=category,)
-#        title = Title.objects.get(name=name)
-#        for genre in genres:
-#            print(genre)
-#            genre_obj = get_object_or_404(Genre, slug=genre)
-#            title.genre.add(genre_obj)
-#        title.save()
+        genres = self.request.POST.getlist('genre')
+        # genres = data['genre']
+
+        serializer.save(category=category)
+        # obj = Title.objects.create(name=name, year=year, description=description, category=category)
+        obj = Title.objects.get(name=name)
+        for g in genres:
+            genre = get_object_or_404(Genre, slug=g)
+            obj.genre.add(genre)
 
     def perform_update(self, serializer):
         category_slug = self.request.data['category']
