@@ -17,7 +17,7 @@ class User(AbstractUser):
         default=UserRoles.USER,
         verbose_name='Роль пользователя'
     )
-    email = models.EmailField('email', unique=True)
+    email = models.EmailField('email', unique=True, db_index=True)
     confirmation_code = models.CharField(max_length=200, blank=False)
     username = models.CharField(
         max_length=150,
