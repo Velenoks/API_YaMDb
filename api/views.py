@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 
 from .models import (Review, Comment, Title,
                      Genre, Category)
@@ -21,6 +21,7 @@ class CategoryViewSet(MixListCreateDestroy):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
 
@@ -29,6 +30,7 @@ class GenreViewSet(MixListCreateDestroy):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
 
@@ -70,4 +72,5 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category', 'genre', 'name', 'year']
+    filterset_fields = ['genre', 'name', 'year']
+
