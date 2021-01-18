@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import (Review, Comment, Title,
                      Genre, Category)
@@ -68,7 +68,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    # queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
@@ -76,7 +75,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Title.objects.all()
-        # print(self.request.query_params)
         genre = self.request.query_params.get('genre', None)
         category = self.request.query_params.get('category', None)
         name = self.request.query_params.get('name', None)
@@ -90,19 +88,11 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         data = self.request.data
-        # print('findme')
-        # print(data)
-        # print(self.request.POST.getlist('genre'))
         name = data['name']
-        # year = data['year']
-        # description = data['description']
         category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
         genres = self.request.POST.getlist('genre')
-        # genres = data['genre']
-
         serializer.save(category=category)
-        # obj = Title.objects.create(name=name, year=year, description=description, category=category)
         obj = Title.objects.get(name=name)
         for g in genres:
             genre = get_object_or_404(Genre, slug=g)
@@ -112,6 +102,3 @@ class TitleViewSet(viewsets.ModelViewSet):
         category_slug = self.request.data['category']
         category = get_object_or_404(Category, slug=category_slug)
         serializer.save(category=category,)
-
-
-

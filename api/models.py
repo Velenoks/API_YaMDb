@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 
+
 User = get_user_model()
 
 
@@ -12,7 +13,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
@@ -22,7 +23,7 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
@@ -36,7 +37,7 @@ class Title(models.Model):
         blank=True
     )
     description = models.TextField(blank=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    genre = models.ManyToManyField(Genre, through="GenreTitle")
     category = models.ForeignKey(Category,
                                  blank=True,
                                  null=True,
@@ -46,13 +47,13 @@ class Title(models.Model):
     @property
     def rating(self):
         return Review.objects.filter(title=self.id).aggregate(
-            Avg('score'))['score__avg']
+            Avg("score"))["score__avg"]
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ('-year',)
+        ordering = ("-year",)
         verbose_name = "Произведение"
         verbose_name_plural = "Произведения"
 
@@ -105,6 +106,6 @@ class Comment(models.Model):
                                     auto_now_add=True)
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ("-pub_date",)
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
