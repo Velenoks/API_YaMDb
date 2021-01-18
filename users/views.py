@@ -1,5 +1,4 @@
 from django.core.mail import send_mail
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -16,7 +15,8 @@ from .permissions import (
 from .serializers import UserSerializerForAdmin, UserSerializer
 
 
-USER_DOES_NOT_EXIST = 'Ошибка при отправке запроса: такого пользователя нет в базе данных'
+USER_DOES_NOT_EXIST = ('Ошибка при отправке запроса: '
+                       'такого пользователя нет в базе данных')
 
 
 @api_view(['POST'])
@@ -38,7 +38,8 @@ def auth(request):
         )
         send_mail(
             subject='Confirmation Code',
-            message=f'Код подтверждения для получения токена: {confirmation_code}',
+            message=(f'Код подтверждения для'
+                     f' получения токена: {confirmation_code}'),
             from_email='api@yandex.ru',
             recipient_list=[email],
             fail_silently=False,
@@ -62,8 +63,8 @@ def get_token(request):
         )
         tokens = RefreshToken.for_user(user)
         data = {
-            "refresh": str(tokens),
-            "access": str(tokens.access_token)
+            'refresh': str(tokens),
+            'access': str(tokens.access_token)
         }
         return Response(data, status=status.HTTP_201_CREATED)
     return Response(USER_DOES_NOT_EXIST, status.HTTP_400_BAD_REQUEST)
