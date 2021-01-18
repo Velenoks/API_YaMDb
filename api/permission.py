@@ -1,11 +1,12 @@
 from rest_framework import permissions
+from users.models import UserRoles
 
 
 class IsModerOrAuthorOrReadOnly(permissions.BasePermission):
     """Проверка на Автора и Модератора."""
     def has_object_permission(self, request, view, obj):
         return (request.method in permissions.SAFE_METHODS
-                or 'moderator' == request.user.role
+                or UserRoles.MODERATOR == request.user.role
                 or obj.author == request.user)
 
 

@@ -9,53 +9,66 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=200,
+                            verbose_name="Категория",
+                            blank=True)
+    slug = models.SlugField(unique=True, verbose_name="Slug")
 
     class Meta:
         ordering = ["-id"]
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
+    def __str__(self):
+        return self.name
+
 
 class Genre(models.Model):
-    name = models.CharField(max_length=200, blank=True)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=200,
+                            verbose_name="Жанр",
+                            blank=True)
+    slug = models.SlugField(unique=True, verbose_name="Slug")
 
     class Meta:
         ordering = ["-id"]
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
+    def __str__(self):
+        return self.name
+
 
 class Title(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, verbose_name="Имя")
     year = models.IntegerField(validators=[
         MaxValueValidator(2022),
         MinValueValidator(1)
     ],
-        blank=True
+        blank=True, verbose_name="Год выпуска", db_index=True
     )
-    description = models.TextField(blank=True)
-    genre = models.ManyToManyField(Genre, through="GenreTitle")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    genre = models.ManyToManyField(Genre,
+                                   through="GenreTitle",
+                                   verbose_name="Жанр")
     category = models.ForeignKey(Category,
                                  blank=True,
                                  null=True,
                                  on_delete=models.SET_NULL,
+                                 verbose_name="Категория",
                                  related_name="titles")
-
-    @property
-    def rating(self):
-        return Review.objects.filter(title=self.id).aggregate(
-            Avg("score"))["score__avg"]
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         ordering = ("-year",)
         verbose_name = "Произведение"
         verbose_name_plural = "Произведения"
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def rating(self):
+        return Review.objects.filter(title=self.id).aggregate(
+            Avg("score"))["score__avg"]
 
 
 class GenreTitle(models.Model):
@@ -73,7 +86,7 @@ class Review(models.Model):
                                verbose_name="Автор",
                                on_delete=models.CASCADE,
                                related_name="reviews")
-    score = models.IntegerField(validators=[
+    score = models.PositiveSmallIntegerField(validators=[
                                     MaxValueValidator(10),
                                     MinValueValidator(1)
                                 ],
