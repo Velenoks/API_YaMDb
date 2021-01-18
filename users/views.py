@@ -1,18 +1,17 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from rest_framework import viewsets, filters, mixins, status
-from rest_framework.decorators import api_view, permission_classes, action
+from django.utils.http import urlsafe_base64_encode
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
-from .permissions import (
-    AdminOnlyPermission, AdminOrModeratorOrAuthorPermission
-)
-from .serializers import UserSerializerForAdmin, UserSerializer
+from .permissions import (AdminOnlyPermission,
+                          AdminOrModeratorOrAuthorPermission)
+from .serializers import UserSerializer, UserSerializerForAdmin
 
 
 USER_DOES_NOT_EXIST = ('Ошибка при отправке запроса: '

@@ -1,15 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from .models import (Review, Comment, Title,
-                     Genre, Category)
-from .serializers import (ReviewSerializer, CommentSerializer,
-                          CategorySerializer, GenreSerializer,
-                          TitleSerializer)
+from .models import Category, Comment, Genre, Review, Title
 from .permission import IsAdmin, IsModerOrAuthorOrReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer)
 
 
 class MixListCreateDestroy(mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -47,8 +45,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer, *args, **kwargs):
         title_id = self.kwargs['title_id']
         title = get_object_or_404(Title, id=title_id)
-        if not Review.objects.filter(author=self.request.user,
-                                     title=title).exists():
+        if not title.reviews.filter(author=self.request.user,
+                                    title=title).exists():
             serializer.save(author=self.request.user, title=title)
 
 
