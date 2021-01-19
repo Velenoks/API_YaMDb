@@ -1,9 +1,11 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from .filters import TitleFilter
 from .models import Category, Comment, Genre, Review, Title
 from .permission import IsAdmin, IsModerOrAuthorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -12,25 +14,20 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 class MixListCreateDestroy(mixins.ListModelMixin, mixins.CreateModelMixin,
                            mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    pass
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
+    lookup_field = 'slug'
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 
 class CategoryViewSet(MixListCreateDestroy):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
-    lookup_field = 'slug'
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
 
 
 class GenreViewSet(MixListCreateDestroy):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin,)
-    lookup_field = 'slug'
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -66,23 +63,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score')
+    ).order_by('id')
     serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['year']
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        genre = self.request.query_params.get('genre', None)
-        category = self.request.query_params.get('category', None)
-        name = self.request.query_params.get('name', None)
-        if genre is not None:
-            queryset = queryset.filter(genre__slug=genre)
-        elif category is not None:
-            queryset = queryset.filter(category__slug=category)
-        elif name is not None:
-            queryset = queryset.filter(name__contains=name)
-        return queryset
+    filterset_class = TitleFilter
 
     def perform_create(self, serializer):
         data = self.request.data

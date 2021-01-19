@@ -27,12 +27,3 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
         )
         model = User
-
-
-# class TokenSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         fields = (
-#             'email',
-#             'confirmation_code'
-#         )
-#         model = User

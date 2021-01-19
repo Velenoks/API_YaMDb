@@ -14,7 +14,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, verbose_name="Slug")
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ("-id",)
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
@@ -29,7 +29,7 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True, verbose_name="Slug")
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ("-id",)
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
@@ -57,17 +57,11 @@ class Title(models.Model):
                                  related_name="titles")
 
     class Meta:
-        ordering = ("-year",)
         verbose_name = "Произведение"
         verbose_name_plural = "Произведения"
 
     def __str__(self):
         return self.name
-
-    @property
-    def rating(self):
-        return Review.objects.filter(title=self.id).aggregate(
-            Avg("score"))["score__avg"]
 
 
 class GenreTitle(models.Model):
