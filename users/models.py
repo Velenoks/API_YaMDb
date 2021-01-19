@@ -9,7 +9,11 @@ class UserRoles(models.TextChoices):
 
 
 class User(AbstractUser):
-    bio = models.TextField(max_length=300, blank=True)
+    bio = models.TextField(
+        max_length=300,
+        blank=True,
+        verbose_name='О пользователе'
+    )
     role = models.CharField(
         max_length=10,
         blank=False,
@@ -17,12 +21,16 @@ class User(AbstractUser):
         default=UserRoles.USER,
         verbose_name='Роль пользователя'
     )
-    email = models.EmailField('email', unique=True, db_index=True)
-    confirmation_code = models.CharField(max_length=200, blank=False)
+    email = models.EmailField(
+        unique=True,
+        db_index=True,
+        verbose_name='Электронная почта'
+    )
     username = models.CharField(
         max_length=150,
         unique=True,
         blank=False,
+        verbose_name='Имя пользователе'
     )
 
     class Meta:
