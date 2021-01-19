@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
+
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -7,7 +9,8 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Category, Comment, Genre, Review, Title
 from .permission import IsAdmin, IsModerOrAuthorOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer, TitleSerializer)
+                          GenreSerializer, ReviewSerializer,
+                          TitleSerializer, TitleSerializerWrite)
 
 
 class MixListCreateDestroy(mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -66,13 +69,21 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    serializer_class = TitleSerializer
+    # serializer_class = TitleSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['year']
 
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return TitleSerializerWrite
+        return TitleSerializer
+
     def get_queryset(self):
-        queryset = Title.objects.all()
+        print(self.action)
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return Title.objects.all()
+        queryset = Title.objects.all().annotate(score=Avg('reviews__score'))
         genre = self.request.query_params.get('genre', None)
         category = self.request.query_params.get('category', None)
         name = self.request.query_params.get('name', None)
@@ -90,6 +101,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
         genres = self.request.POST.getlist('genre')
+        # genres = self.request.data['genre']
         serializer.save(category=category)
         obj = Title.objects.get(name=name)
         for g in genres:

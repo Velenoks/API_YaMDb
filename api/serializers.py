@@ -5,14 +5,12 @@ from .models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
         exclude = ('id',)
         model = Genre
@@ -48,15 +46,33 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date', )
+        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comment
 
 
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField()
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        model = Title
+
+
+class TitleSerializerWrite(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=True,
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        fields = ('id', 'name', 'year',
                   'description', 'genre', 'category')
         model = Title

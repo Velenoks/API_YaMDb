@@ -64,11 +64,6 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
-    @property
-    def rating(self):
-        return Review.objects.filter(title=self.id).aggregate(
-            Avg("score"))["score__avg"]
-
 
 class GenreTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
