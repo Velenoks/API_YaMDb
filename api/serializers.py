@@ -62,17 +62,20 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializerWrite(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        read_only=True,
-    )
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        many=True,
-        read_only=True,
-    )
+    # category = serializers.SlugRelatedField(
+    #     slug_field='slug',
+    #     read_only=True,
+    # )
+    # genre = serializers.SlugRelatedField(
+    #     slug_field='slug',
+    #     many=True,
+    #     read_only=True,
+    # )
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
 
     class Meta:
         fields = ('id', 'name', 'year',
                   'description', 'genre', 'category')
         model = Title
+        depth = 1

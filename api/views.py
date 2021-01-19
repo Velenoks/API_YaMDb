@@ -5,6 +5,7 @@ from django.db.models import Avg
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 from .models import Category, Comment, Genre, Review, Title
 from .permission import IsAdmin, IsModerOrAuthorOrReadOnly
@@ -70,7 +71,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     # serializer_class = TitleSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
+    # permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['year']
 
@@ -83,7 +84,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         print(self.action)
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return Title.objects.all()
-        queryset = Title.objects.all().annotate(score=Avg('reviews__score'))
+        queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
         genre = self.request.query_params.get('genre', None)
         category = self.request.query_params.get('category', None)
         name = self.request.query_params.get('name', None)
@@ -95,20 +96,54 @@ class TitleViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__contains=name)
         return queryset
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        response = super(TitleViewSet, self).create(request, args, kwargs)
+        print(response)
         data = self.request.data
         name = data['name']
+        print(data)
         category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
-        genres = self.request.POST.getlist('genre')
-        # genres = self.request.data['genre']
-        serializer.save(category=category)
-        obj = Title.objects.get(name=name)
+        print(category)
+        # genres = self.request.POST.getlist('genre')
+        genres = data['genre']
+        # serializer = self.get_serializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # newdata = serializer.validated_data
+        obj = Title(
+            name=name,
+            category=category,
+            description='111111111111111111111111',
+            year=data['year'])
+        obj.save()
         for g in genres:
             genre = get_object_or_404(Genre, slug=g)
+            print(genre)
             obj.genre.add(genre)
-
-    def perform_update(self, serializer):
-        category_slug = self.request.data['category']
-        category = get_object_or_404(Category, slug=category_slug)
-        serializer.save(category=category,)
+        print('tofind')
+        print(obj)
+        read_serializer = TitleSerializer(obj)
+        print('out')
+        print(read_serializer.data)
+        return Response(read_serializer.data)
+        # self.perform_create(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    # def perform_create(self, serializer):
+    #     data = self.request.data
+    #     name = data['name']
+    #     category_slug = data['category']
+    #     category = get_object_or_404(Category, slug=category_slug)
+    #     # genres = self.request.POST.getlist('genre')
+    #     genres = self.request.data['genre']
+    #     serializer.save(category=category, rating=rating)
+    #     obj = Title.objects.get(name=name)
+    #     for g in genres:
+    #         genre = get_object_or_404(Genre, slug=g)
+    #         obj.genre.add(genre)
+    #
+    # def perform_update(self, serializer):
+    #     category_slug = self.request.data['category']
+    #     category = get_object_or_404(Category, slug=category_slug)
+    #     serializer.save(category=category,)
