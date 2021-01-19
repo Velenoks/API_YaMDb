@@ -100,7 +100,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         # response = super(TitleViewSet, self).create(request, args, kwargs)
         # print(response)
         data = self.request.data
-        name = data['name']
         print(data)
         category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
@@ -124,10 +123,34 @@ class TitleViewSet(viewsets.ModelViewSet):
         print('tofind')
         print(obj)
         rating = 1
-        read_serializer = TitleSerializer(obj, rating=rating)
+        obj.rating = rating
+        print(obj.id, obj.category, obj.rating)
+        data = {
+            "name": obj.name,
+            "year": obj.year,
+            "rating": obj.rating,
+            "description": obj.description,
+            "genre": [
+                {
+                    "name": "Genre2",
+                    "slug": "genre2"
+                },
+                {
+                    "name": "Genre1",
+                    "slug": "genre1"
+                }
+            ],
+            "category": {
+                "name": "Drama",
+                "slug": "drama"
+            }}
+        read_serializer = TitleSerializer(data=data)
+        print(obj.genre, obj.name)
+        print(read_serializer)
+        read_serializer.is_valid(raise_exception=True)
         print('out')
-        print(read_serializer.data)
-        return Response(read_serializer.data)
+        print(read_serializer.validated_data)
+        return Response(read_serializer.validated_data)
         # self.perform_create(serializer)
         # headers = self.get_success_headers(serializer.data)
         # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

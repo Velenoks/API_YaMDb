@@ -73,9 +73,13 @@ class TitleSerializerWrite(serializers.ModelSerializer):
     # )
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.SerializerMethodField('get_rating')
+
+    def get_rating(self, obj):
+        return 1
 
     class Meta:
-        fields = ('id', 'name', 'year',
+        fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
         model = Title
         depth = 1
