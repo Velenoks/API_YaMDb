@@ -71,7 +71,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     # serializer_class = TitleSerializer
-    # permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin, )
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['year']
 
@@ -104,8 +104,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         category_slug = data['category']
         category = get_object_or_404(Category, slug=category_slug)
         print(category)
-        # genres = self.request.POST.getlist('genre')
-        genres = data['genre']
+        genres = self.request.POST.getlist('genre')
+        # genres = data['genre']
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         newdata = serializer.validated_data
@@ -120,28 +120,36 @@ class TitleViewSet(viewsets.ModelViewSet):
             genre = get_object_or_404(Genre, slug=g)
             print(genre)
             obj.genre.add(genre)
+        obj.save()
         print('tofind')
         print(obj)
-        rating = 1
-        obj.rating = rating
-        print(obj.id, obj.category, obj.rating)
+        print(obj.reviews.all().aggregate(rating=Avg('score')))
+        rating = obj.reviews.all().aggregate(rating=Avg('score'))['rating']
+        # rating = (Avg('score')))
+        print(rating)
+        # print(Avg(obj.reviews.score))
+
+        # obj.rating = rating
+        print(obj.id, obj.category)
         data = {
+            "id": obj.id,
             "name": obj.name,
             "year": obj.year,
-            "rating": obj.rating,
+            "rating": rating,
             "description": obj.description,
             "genre": [{"slug": get_object_or_404(Genre, slug=genre).slug, "name": get_object_or_404(Genre, slug=genre).name} for genre in genres],
             "category": {
                 "name": category.name,
                 "slug": category.slug
             }}
-        read_serializer = TitleSerializer(data=data)
+        # read_serializer = TitleSerializer(data=data)
         print(obj.genre, obj.name)
-        print(read_serializer)
-        read_serializer.is_valid(raise_exception=True)
+        # print(read_serializer)
+        # read_serializer.is_valid(raise_exception=True)
         print('out')
-        print(read_serializer.validated_data)
-        return Response(read_serializer.validated_data)
+        # print(read_serializer.validated_data)
+        return Response(data)
+        # return Response(read_serializer.validated_data)
         # self.perform_create(serializer)
         # headers = self.get_success_headers(serializer.data)
         # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -158,8 +166,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     #     for g in genres:
     #         genre = get_object_or_404(Genre, slug=g)
     #         obj.genre.add(genre)
-    #
-    # def perform_update(self, serializer):
-    #     category_slug = self.request.data['category']
-    #     category = get_object_or_404(Category, slug=category_slug)
-    #     serializer.save(category=category,)
+
+    def perform_update(self, serializer):
+        category_slug = self.request.data['category']
+        category = get_object_or_404(Category, slug=category_slug)
+        serializer.save(category=category,)
