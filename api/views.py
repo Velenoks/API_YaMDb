@@ -97,8 +97,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request, *args, **kwargs):
-        response = super(TitleViewSet, self).create(request, args, kwargs)
-        print(response)
+        # response = super(TitleViewSet, self).create(request, args, kwargs)
+        # print(response)
         data = self.request.data
         name = data['name']
         print(data)
@@ -107,14 +107,15 @@ class TitleViewSet(viewsets.ModelViewSet):
         print(category)
         # genres = self.request.POST.getlist('genre')
         genres = data['genre']
-        # serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        # newdata = serializer.validated_data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        newdata = serializer.validated_data
+        # serializer.save(category=category)
         obj = Title(
-            name=name,
+            name=newdata['name'],
             category=category,
-            description='111111111111111111111111',
-            year=data['year'])
+            description=newdata["description"],
+            year=newdata['year'])
         obj.save()
         for g in genres:
             genre = get_object_or_404(Genre, slug=g)
@@ -122,7 +123,8 @@ class TitleViewSet(viewsets.ModelViewSet):
             obj.genre.add(genre)
         print('tofind')
         print(obj)
-        read_serializer = TitleSerializer(obj)
+        rating = 1
+        read_serializer = TitleSerializer(obj, rating=rating)
         print('out')
         print(read_serializer.data)
         return Response(read_serializer.data)
