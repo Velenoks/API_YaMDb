@@ -130,19 +130,10 @@ class TitleViewSet(viewsets.ModelViewSet):
             "year": obj.year,
             "rating": obj.rating,
             "description": obj.description,
-            "genre": [
-                {
-                    "name": "Genre2",
-                    "slug": "genre2"
-                },
-                {
-                    "name": "Genre1",
-                    "slug": "genre1"
-                }
-            ],
+            "genre": [{"slug": get_object_or_404(Genre, slug=genre).slug, "name": get_object_or_404(Genre, slug=genre).name} for genre in genres],
             "category": {
-                "name": "Drama",
-                "slug": "drama"
+                "name": category.name,
+                "slug": category.slug
             }}
         read_serializer = TitleSerializer(data=data)
         print(obj.genre, obj.name)
