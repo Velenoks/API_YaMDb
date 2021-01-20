@@ -1,6 +1,8 @@
 .git/*
 env/
 venv/
+/api/migrations/
+/users/migrations/
 
 __pycache__/
 *.py[cod]
